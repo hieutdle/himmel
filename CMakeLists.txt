@@ -10,6 +10,12 @@ project(Himmel VERSION 1.0
                   DESCRIPTION "Himmel The Database"
                   LANGUAGES CXX)
 # Add an executable to the project using the specified source files
-add_executable(Himmel src/Himmel.cpp src/Database.cpp)
+add_executable(Himmel
+    src/Himmel.cpp
+    src/Database.cpp
+    src/Tuple.cpp
+    src/Table.cpp
+    # Add other source files here
+)
 
 target_include_directories(Himmel PUBLIC ${CMAKE_HOME_DIRECTORY}/include)
