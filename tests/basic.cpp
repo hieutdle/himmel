@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -7,25 +9,41 @@
 #include <string>
 #include <vector>
 
-// Execute a shell command and capture its output
-std::string executeCommand(const char *cmd) {
+std::string run_script(const std::vector<std::string> &commands) {
+  std::string tempFileName =
+      std::filesystem::temp_directory_path() / "script.tmp";
+  std::ofstream tempFile(tempFileName);
+  if (!tempFile) {
+    throw std::runtime_error("Failed to create temporary script file.");
+  }
+
+  for (const auto &cmd : commands) {
+    tempFile << cmd << '\n';
+  }
+  tempFile.close();
+
+  std::string command = "./Himmel < " + tempFileName;
   std::array<char, 128> buffer;
   std::string result;
-  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"),
+                                                pclose);
   if (!pipe) {
-    throw std::runtime_error("popen() failed!");
+    throw std::runtime_error("Failed to run Himmel executable.");
   }
-  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+  while (fgets(buffer.data(), buffer.size(), pipe.get())) {
     result += buffer.data();
   }
+
+  std::filesystem::remove(tempFileName);
   return result;
 }
 
 class DatabaseTest : public ::testing::Test {};
 
-TEST_F(DatabaseTest, TestExitAndUnrecognizedCommandAndSqlSentence) {
-  std::string result =
-      executeCommand("echo -e 'hello world\n.HELLO WORLD\n.exit' | ./Himmel");
+// Tests for unrecognized commands and proper exit behavior
+TEST_F(DatabaseTest, ExitAndUnrecognizedCommandAndSqlSentence) {
+  std::vector<std::string> commands = {"hello world", ".HELLO WORLD", ".exit"};
+  std::string result = run_script(commands);
   std::vector<std::string> expected = {
       "db > Unrecognized keyword at start of 'hello world'.",
       "db > Unrecognized command: .HELLO WORLD", "db > Bye!"};
@@ -39,10 +57,11 @@ TEST_F(DatabaseTest, TestExitAndUnrecognizedCommandAndSqlSentence) {
   }
 }
 
-TEST_F(DatabaseTest, InsertsAndRetrievesARow) {
-  std::string result =
-      executeCommand("echo -e 'INSERT 1 user1 person1@example.com\nINSERT 2 "
-                     "user2\nSELECT\n.exit' | ./Himmel");
+// Tests inserting data and retrieving a row
+TEST_F(DatabaseTest, InsertsAndRetrievesATuple) {
+  std::vector<std::string> commands = {"INSERT 1 user1 person1@example.com",
+                                       "INSERT 2 user2", "SELECT", ".exit"};
+  std::string result = run_script(commands);
   std::vector<std::string> expected = {
       "db > Executed.", "db > Syntax error. Could not parse statement.",
       "db > (1, user1, person1@example.com)", "Executed.", "db > Bye!"};
