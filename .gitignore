@@ -4,3 +4,9 @@
 
 # Vscode files
 .vscode
+
+# CMake
+build/
+cmake-build-debug/
+.idea
+.cache
