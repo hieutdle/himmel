@@ -11,7 +11,7 @@ func TestExecuteInsert(t *testing.T) {
 	table := Table{}
 	statement := Statement{
 		statementType: StatementInsert,
-		tupleToInsert: Tuple{ID: 1, Username: "user", Email: "email"},
+		tupleToInsert: Tuple{ID: 0, Username: "user", Email: "email"},
 	}
 
 	result := table.ExecuteInsert(&statement)
@@ -23,8 +23,8 @@ func TestExecuteInsert(t *testing.T) {
 func TestExecuteSelect(t *testing.T) {
 	table := Table{
 		tuples: []Tuple{
-			{ID: 1, Username: "user1", Email: "email1"},
-			{ID: 2, Username: "user2", Email: "email2"},
+			{ID: 0, Username: "user1", Email: "email1"},
+			{ID: 1, Username: "user2", Email: "email2"},
 		},
 	}
 
@@ -33,6 +33,6 @@ func TestExecuteSelect(t *testing.T) {
 	output := tools.CaptureOutput(func() {
 		table.ExecuteSelect(&statement)
 	})
-	expectedOutput := "(1, user1, email1)\n(2, user2, email2)\n"
+	expectedOutput := "(0, user1, email1)\n(1, user2, email2)\n"
 	assert.Equal(t, expectedOutput, output)
 }

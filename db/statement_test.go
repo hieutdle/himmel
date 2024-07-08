@@ -12,7 +12,7 @@ func TestPrepareStatement(t *testing.T) {
 		input    string
 		expected PrepareResult
 	}{
-		{"INSERT 1 user email", PrepareSucess},
+		{"INSERT 0 user email", PrepareSucess},
 		{"insert 1 user", PrepareSyntaxError},
 		{"select", PrepareSucess},
 		{"unknown", PrepareUnrecognizedStatement},
@@ -30,7 +30,7 @@ func TestParseStatement(t *testing.T) {
 		input    string
 		expected bool
 	}{
-		{"INSERT 1 user email", false},
+		{"INSERT 0 user email", false},
 		{"insert 1 user", true},
 		{"select", false},
 		{"unknown", true},
