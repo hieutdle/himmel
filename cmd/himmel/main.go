@@ -3,35 +3,26 @@ package main
 import (
 	"fmt"
 
-	"github.com/hieutdle/himmel/internal"
+	"github.com/hieutdle/himmel/db"
 )
 
 func main() {
+	table := db.Table{}
+
 	for {
-		internal.PrintPrompt()
-		input := internal.ReadInput()
+		db.PrintPrompt()
+		input := db.ReadInput()
 
-		if len(input) > 0 && input[0] == '.' {
-			switch internal.DoMetaCommand(input) {
-			case internal.META_COMMAND_SUCCESS:
-				continue
-			case internal.META_COMMAND_UNRECOGNIZED_COMMAND:
-				fmt.Printf("Unrecognized command '%s'\n", input)
-				continue
-			}
-		}
-
-		var statement internal.Statement
-
-		switch internal.PrepareStatement(input, &statement) {
-		case internal.PREPARE_SUCCESS:
-			break
-		case internal.PREPARE_UNRECOGNIZED_STATEMENT:
-			fmt.Printf("Unrecognized keyword at start of '%s'.\n", input)
+		if db.ParseMetaCommand(input) {
 			continue
 		}
 
-		internal.ExecuteStatement(&statement)
+		var statement db.Statement
+
+		if statement.ParseStatement(input) {
+			continue
+		}
+		statement.ExecuteStatement(&table)
 		fmt.Println("Executed.")
 	}
 }
