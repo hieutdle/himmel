@@ -1,6 +1,9 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type PrepareResult int
 
@@ -23,15 +26,18 @@ type Statement struct {
 }
 
 func (statement *Statement) PrepareStatement(input string) PrepareResult {
-	if len(input) >= 6 && (input[:6] == "insert" || input[:6] == "INSERT") {
+	input = strings.ToLower(input[:6]) + input[6:]
+	fmt.Println(input)
+	if len(input) >= 6 && input[:6] == "insert" {
 		statement.statementType = StatementInsert
 		assigned, err := fmt.Sscanf(input, "insert %d %s %s", &statement.tupleToInsert.ID, &statement.tupleToInsert.Username, &statement.tupleToInsert.Email)
 		if assigned < 3 || err != nil {
+			fmt.Println("reach")
 			return PrepareSyntaxError
 		}
 		return PrepareSucess
 	}
-	if len(input) >= 6 && (input[:6] == "select" || input[:6] == "SELECT") {
+	if len(input) >= 6 && input[:6] == "select" {
 		statement.statementType = StatementSelect
 		return PrepareSucess
 	}
