@@ -2,7 +2,11 @@ package db
 
 import "fmt"
 
-const tableMaxTuple = 100
+const (
+	TableMaxTuple   = 100
+	ColumnUserSize  = 32
+	ColumnEmailSize = 255
+)
 
 type Tuple struct {
 	ID       uint
@@ -22,7 +26,7 @@ const (
 )
 
 func (table *Table) ExecuteInsert(statement *Statement) ExecuteResult {
-	if len(table.tuples) >= tableMaxTuple {
+	if len(table.tuples) >= TableMaxTuple {
 		fmt.Println("Error: Table full.")
 		return ExecuteTableFull
 	}
